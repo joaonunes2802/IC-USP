@@ -166,7 +166,7 @@ UEs_idle = []
 UEs_connected = []
 UEs_inactive = []
 
-for t_execucao in range(1, 10000):
+for i in range(1000):
     UEs_idle.append(rd.randint(0, 1))  # Entrada de usuários na rede, 0 -> baixo consumo, 1 -> alto consumo
     if len(UEs_idle) > 10:
         UEI_sorteado = sorteio_idle(UEs_idle)
@@ -188,5 +188,3 @@ for t_execucao in range(1, 10000):
 print(UEs_idle)
 print(UEs_connected)
 print(UEs_inactive)
-
-# Problema: Sair do inactive
