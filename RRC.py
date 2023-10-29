@@ -3,7 +3,21 @@ This file is responsible for implementation of NR RRC in context of 5G Network u
 Markov Chains to model RRC states, which are, idle, connected and inactive states.
 """
 import random as rd
+from time import sleep
 
+
+def is_full(list_inactive, list_connected):
+    if len(list_inactive) + len(list_connected) < 273:
+        return False
+
+    return True
+
+
+def is_idle_full(list_idle):
+    if len(list_idle) == 500:
+        return True
+
+    return False
 
 def sorteio_idle(list_idle):
     # Sorteia um UE aleatoriamente que se encontra em uma posição entre 1 e 550
@@ -35,6 +49,7 @@ def sorteio_inactive(list_inactive):
 def idle_to_connected(UE_idle, list_connected):
      # establish the connection between UE of origin and the network
     list_connected.append(UE_idle)
+
 
 def connected_to_inactive(UE_connected, list_inactive):
      # Put the respective UE in inactive state
@@ -78,69 +93,100 @@ def transition_matrix(actual_state):
     # P(connected -> connected) = 0; a33
 
     matrix = [[0.5, 0.5, 0], [0.5, 0, 0.5], [0.5, 0.5, 0]]
-    next_state = rd.randint(1, 2)
+    next_state = rd.randint(0, 2)
     prob = matrix[actual_state][next_state]
     return next_state, prob
 
 
-def inactive(UE, list_idle, list_connected):
-    # Após o sorteio, verifica se o UE que passar para o connected, permanecer em iactive, ou ir para idle
-
-    next_state, prob = transition_matrix(1)
-    if prob == 0:  # Deseja permanecer em inactive, nesse caso, como o seu tempo esgotou, vai para idle
-        inactive_to_idle(UE, list_idle)
-    else:
-        if next_state == 0:
-            inactive_to_idle(UE, list_idle)
-        else:
-            inactive_to_connected(UE, list_connected)
-
-
-def idle(UE, list_connected, idle_list):
+def idle(UE, list_connected, idle_list, inactive_list):
     # Após o sorteio, verifica se o UE que passar para o connected ou permanecer idle
 
     next_state, prob = transition_matrix(0)
-    if prob == 0:   # deseja ir de idle para inactive, o que é proibido
+    if prob == 0 and is_idle_full(idle_list) is False:   # deseja ir de idle para inactive, o que é proibido
         idle_list.append(UE)
+    elif (prob == 0 and is_idle_full(idle_list) is True) and is_full(inactive_list, list_connected) is False:
+        idle_to_connected(UE, list_connected)
     else:
-        if next_state == 0:
-            idle_list.append(UE)  # Usuario deseja permanecer em idle
-        else:
-            idle_to_connected(UE, list_connected)
+        if next_state == 0 and is_idle_full(idle_list) is False:
+            idle_list.append(UE)  # Usuario deseja permanecer em idle e idle não está cheio
+        elif next_state == 1 and is_full(inactive_list, list_connected) is False:
+            idle_to_connected(UE, list_connected)  # UE deseja ir para connected, e o limite da rede não foi atingido
+        elif (next_state == 1 and is_full(inactive_list, list_connected) is True) and is_idle_full(idle_list) is False:
+            idle_list.append(UE)
 
 
-def connected(UE, list_idle, list_inactive):
+def connected(UE, list_idle, list_inactive, list_connected):
     # Após o sorteio, verifica se o UE que passar para o idle, ir para o inactive ou permanecer em connected
 
-    next_state, prob = transition_matrix(2)
-    if prob == 0:  # Deseja permancer em connected, nesse caso, ele deve ir para inactive
+    next_state, prob = transition_matrix(1)
+    if prob == 0 and is_full(list_inactive, list_connected) is False:
+        # Deseja permancer em connected, e a rede não tá no limite, nesse caso, ele deve ir para inactive
+
         connected_to_inactive(UE, list_inactive)
-    else:
-        if next_state == 0:
+    elif (prob == 0 and is_full(list_inactive, list_connected) is True) and is_idle_full(list_idle) is False:
+        # Caso a rede esteja no limite, o UE deve ir para idle, caso idle também não esteja no limite
+
+        connected_to_idle(UE, list_idle)
+    elif next_state == 0:
+        if is_idle_full(list_idle) is False:
+            # UE deseja sair de connected e ir para idle, e idle está vazio
             connected_to_idle(UE, list_idle)
-        else:
+        elif is_idle_full(list_idle) is True and is_full(list_inactive, list_connected) is False:
+            # deseja ir para idle, mas idle está cheio, e o l imite não foi atingido, vai para inactive
+
             connected_to_inactive(UE, list_inactive)
+    elif next_state == 2:
+        if is_full(list_inactive, list_connected) is False:
+            connected_to_inactive(UE, list_inactive)
+        elif connected_to_inactive(UE, list_inactive) is True and is_idle_full(list_idle) is False:
+            connected_to_idle(UE, list_idle)
+
+
+def inactive(UE, list_idle, list_connected, list_inactive):
+    # Após o sorteio, verifica se o UE que passar para o connected, permanecer em iactive, ou ir para idle
+
+    next_state, prob = transition_matrix(2)
+    if prob == 0 and is_idle_full(list_idle) is False:  # Deseja permanecer em inactive, nesse caso, como o seu tempo esgotou, vai para idle
+        inactive_to_idle(UE, list_idle)
+    elif (prob == 0 and is_idle_full(list_idle) is True) and is_full(list_inactive, list_connected):
+        inactive_to_connected(UE, list_connected)
+    elif next_state == 0:
+        if is_idle_full(list_idle) is False:
+            inactive_to_idle(UE, list_idle)
+        elif is_idle_full(list_idle) is True and is_full(list_inactive, list_connected) is False:
+            inactive_to_connected(UE, list_connected)
+    elif next_state == 1:
+        if is_full(list_inactive, list_connected) is False:
+            inactive_to_connected(UE, list_connected)
+        elif inactive_to_connected(UE, list_connected) is True and is_idle_full(list_idle) is False:
+            inactive_to_idle(UE, list_idle)
 
 
 UEs_idle = []
 UEs_connected = []
 UEs_inactive = []
 
-for t_execucao in range(1, 1000):
-    UEs_idle.append(range(2))
+for t_execucao in range(1, 10000):
+    UEs_idle.append(rd.randint(0, 1))  # Entrada de usuários na rede, 0 -> baixo consumo, 1 -> alto consumo
     if len(UEs_idle) > 10:
         UEI_sorteado = sorteio_idle(UEs_idle)
-        idle(UEI_sorteado, UEs_connected, UEs_idle)
+        idle(UEI_sorteado, UEs_connected, UEs_idle, UEs_inactive)
 
     if len(UEs_connected) > 50:
         UEC_sorteado = sorteio_connected(UEs_connected)
-        connected(UEC_sorteado, UEs_idle, UEs_inactive)
+        connected(UEC_sorteado, UEs_idle, UEs_inactive, UEs_connected)
 
     if len(UEs_inactive) > 279:
         UEIN_sorteado = sorteio_inactive(UEs_inactive)
-        inactive(UEIN_sorteado, UEs_idle, UEs_connected)
+        inactive(UEIN_sorteado, UEs_idle, UEs_connected, UEs_inactive)
 
     print(f"Usuarios idle = {len(UEs_idle)}, Usuarios connected = {len(UEs_connected)}, Usuarios inactive = {len(UEs_inactive)}")
 
+    #sleep(1)
+
+
+print(UEs_idle)
+print(UEs_connected)
+print(UEs_inactive)
 
 # Problema: Sair do inactive
