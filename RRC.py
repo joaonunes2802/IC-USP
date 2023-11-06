@@ -127,32 +127,6 @@ def connected_to_idle(UE_connected, list_idle):
 
 
 def transition(UE, list_idle, list_connected, list_inactive, state):
-    # linha 1 (index 0) - idle
-    # linha 2 (index 1)- connected
-    # linha 3 (index 2)- inactive
-
-    # O usuário só tem chance de permanecer no mesmo estado se estiver em idle
-    # A probabilidade de permanecer em qualquer outro estado é 0, supõem-se que ao ser sorteado, o UE deve fazer algo.
-    # O UE que está em idle não pode ir direto para inactive, ele deve antes passar pelo connected
-    # Logo, a probabilidade de um UE em idle ir para o connected ou permanecer em idle é 0.5
-    # A probabilidade de um UE se mover para um estado permitido é 0.5
-
-    # P(idle -> idle) = 0.5 ; a11
-    # P(idle -> connected) = 0.5; a12
-    # P(idle -> inactive) = 0; a13
-    # P(inactive -> idle) = 0.5; a21
-    # P(inactive -> inactive) = 0; a22
-    # P(inactive -> connected) = 0.5; a23
-    # P(connected -> idle) = 0.5; a31
-    # P(connected -> inactive) = 0.5; a32
-    # P(connected -> connected) = 0; a33
-
-    """
-    matrix = [[0.5, 0.5, 0],
-              [0.5, 0, 0.5],
-              [0.5, 0.5, 0]]
-    """
-
     if UE == 0:
         '''
         p = [idle-> idle, idle-> connected], [connected->idle, connected-> inactive], [inactive-> idle, inactive-> connected]
@@ -180,7 +154,7 @@ def transition(UE, list_idle, list_connected, list_inactive, state):
                 if is_idle_full(list_idle) is False:
                     connected_to_idle(UE, list_idle)
         elif state == 2:
-            sleep(0.01)
+            sleep(0.8)
             next = np.random.choice([0, 1], p=p3)
             if next == 1 and is_full(list_inactive, list_connected) is False:
                 inactive_to_connected(UE, list_connected)
@@ -206,14 +180,14 @@ def transition(UE, list_idle, list_connected, list_inactive, state):
             elif next == 0 and is_idle_full(list_idle) is False:
                 list_idle.append(UE)
         elif state == 1:
-            sleep(0.4)
+            sleep(0.8)
             next = np.random.choice([0, 1], p=p2)
             if next == 0 and is_idle_full(list_idle) is False:
                 connected_to_idle(UE, list_idle)
             elif next == 1 and is_full(list_inactive, list_connected) is False:
                 connected_to_inactive(UE, list_inactive)
         elif state == 2:
-            sleep(0.1)
+            sleep(0.01)
             next = np.random.choice([0, 1], p=p3)
             if next == 1 and is_full(list_inactive, list_connected) is False:
                 inactive_to_connected(UE, list_connected)
@@ -248,20 +222,8 @@ print(f"Quantidade de UE connected: {len(UEs_connected)}", end='\n\n')
 print(UEs_inactive)
 print(f"Quantidade de UE inactive: {len(UEs_inactive)}", end='\n\n')
 
-
-#x = np.array([datetime.datetime.now() for i in range(12)])
-
 plt.plot(x, y, "-b", label="UE_Idle")
 plt.plot(x, z, "-r", label="UE_Connected")
 plt.plot(x, w, "-g", label="UE_Inactive")
 plt.legend(loc="upper left")
 plt.show()
-'''
-i=0
-for time_series in len(UEs_idle):
-    plt.plot(time_series, label=UEs_idle[i])
-    i=i+1
-plt.xlabel('Steps',fontsize=20)
-plt.ylabel(r'$S_{n}$',fontsize=20)
-plt.legend()
-'''
