@@ -6,7 +6,7 @@ import random as rd
 import numpy as np
 import matplotlib.pyplot as plt
 import datetime
-from time import sleep
+import time
 
 
 """
@@ -41,14 +41,14 @@ def core_registration(UE, coverage_area, position_UE):
 
 
 def is_full(list_inactive, list_connected):
-    if len(list_inactive) + len(list_connected) < 273:
+    if len(list_inactive) + len(list_connected) <= 273:
         return False
 
     return True
 
 
 def is_idle_full(list_idle):
-    if len(list_idle) == 500:
+    if len(list_idle) == 3000:
         return True
 
     return False
@@ -141,7 +141,7 @@ def transition(UE, list_idle, list_connected, list_inactive, state):
             elif next == 0 and is_idle_full(list_idle) is False:
                 list_idle.append(UE)
         elif state == 1:
-            sleep(0.1)
+            #sleep(0.1)
             next = np.random.choice([0, 1], p=p2)
             if next == 0 and is_idle_full(list_idle) is False:
                 connected_to_idle(UE, list_idle)
@@ -154,7 +154,7 @@ def transition(UE, list_idle, list_connected, list_inactive, state):
                 if is_idle_full(list_idle) is False:
                     connected_to_idle(UE, list_idle)
         elif state == 2:
-            sleep(0.8)
+            #sleep(0.8)
             next = np.random.choice([0, 1], p=p3)
             if next == 1 and is_full(list_inactive, list_connected) is False:
                 inactive_to_connected(UE, list_connected)
@@ -180,14 +180,14 @@ def transition(UE, list_idle, list_connected, list_inactive, state):
             elif next == 0 and is_idle_full(list_idle) is False:
                 list_idle.append(UE)
         elif state == 1:
-            sleep(0.8)
+            #sleep(0.8)
             next = np.random.choice([0, 1], p=p2)
             if next == 0 and is_idle_full(list_idle) is False:
                 connected_to_idle(UE, list_idle)
             elif next == 1 and is_full(list_inactive, list_connected) is False:
                 connected_to_inactive(UE, list_inactive)
         elif state == 2:
-            sleep(0.01)
+            #sleep(0.01)
             next = np.random.choice([0, 1], p=p3)
             if next == 1 and is_full(list_inactive, list_connected) is False:
                 inactive_to_connected(UE, list_connected)
@@ -195,35 +195,43 @@ def transition(UE, list_idle, list_connected, list_inactive, state):
                 inactive_to_idle(UE, list_idle)
 
 
-UEs_idle = []
-UEs_connected = []
-UEs_inactive = []
-states = [UEs_idle, UEs_connected, UEs_inactive]
-y = []
-z = []
-w = []
-x = []
+def start():
+        
+    UEs_idle = []
+    UEs_connected = []
+    UEs_inactive = []
+    states = [UEs_idle, UEs_connected, UEs_inactive]
+    y = []
+    z = []
+    w = []
+    x = []
 
 
-while is_idle_full(UEs_idle) is False:
-    UEs_idle.append(rd.randint(0, 1))  # Entrada de usuários na rede, 0 -> baixo consumo, 1 -> alto consumo
-    if len(UEs_idle) > 10:
-        UE, state = sorteio_state(states)
-        transition(UE, UEs_idle, UEs_connected, UEs_inactive, state)
-    y.append(len(UEs_idle))
-    z.append(len(UEs_connected))
-    w.append((len(UEs_inactive)))
-    x.append(datetime.datetime.now())
+    time_end = time.time() + 30
 
-print(UEs_idle)
-print(f"Quantidade de UE idle: {len(UEs_idle)}", end='\n\n')
-print(UEs_connected)
-print(f"Quantidade de UE connected: {len(UEs_connected)}", end='\n\n')
-print(UEs_inactive)
-print(f"Quantidade de UE inactive: {len(UEs_inactive)}", end='\n\n')
 
-plt.plot(x, y, "-b", label="UE_Idle")
-plt.plot(x, z, "-r", label="UE_Connected")
-plt.plot(x, w, "-g", label="UE_Inactive")
-plt.legend(loc="upper left")
-plt.show()
+    while time.time() < time_end:
+        UEs_idle.append(rd.randint(0, 1))  # Entrada de usuários na rede, 0 -> baixo consumo, 1 -> alto consumo
+        if len(UEs_idle) > 10:
+            UE, state = sorteio_state(states)
+            transition(UE, UEs_idle, UEs_connected, UEs_inactive, state)
+        y.append(len(UEs_idle))
+        z.append(len(UEs_connected))
+        w.append((len(UEs_inactive)))
+        x.append(datetime.datetime.now())
+
+    print(UEs_idle)
+    print(f"Quantidade de UE idle: {len(UEs_idle)}", end='\n\n')
+    print(UEs_connected)
+    print(f"Quantidade de UE connected: {len(UEs_connected)}", end='\n\n')
+    print(UEs_inactive)
+    print(f"Quantidade de UE inactive: {len(UEs_inactive)}", end='\n\n')
+
+    plt.plot(x, y, "-b", label="UE_Idle")
+    plt.plot(x, z, "-r", label="UE_Connected")
+    plt.plot(x, w, "-g", label="UE_Inactive")
+    plt.legend(loc="upper left")
+    plt.show()
+
+
+start()
