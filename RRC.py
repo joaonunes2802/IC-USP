@@ -9,37 +9,6 @@ import datetime
 import time
 
 
-"""
-def area(width):
-    points = []
-    for i in range(width + 1):
-        coluna = []
-        for j in range(width + 1):
-            coluna.append(j)
-        points.append(coluna)
-    return points
-
-
-def position(UE):
-    # Gera a posição x, y de um UE com base em uma distribuição gaussiana, com valor esperado 50 e variância 20
-
-    x = rd.gauss(50, 20)
-    y = rd.gauss(50, 20)
-    return x, y
-
-
-def core_registration(UE, coverage_area, position_UE):
-    # faz a checagem se o UE está na área de cobertuda do Core, e caso esteja, ele é registrado na rede
-
-    x, y = position_UE
-    area = coverage_area
-    if x in len(area) and y in area[x]:
-        return 1
-    else:
-        return -1
-"""
-
-
 def is_full(list_inactive, list_connected):
     if len(list_inactive) + len(list_connected) <= 273:
         return False
