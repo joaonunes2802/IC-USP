@@ -9,15 +9,20 @@ import datetime
 import time
 
 
-def is_full(list_inactive, list_connected):
-    if len(list_inactive) + len(list_connected) <= 273:
+def is_full(list_connected):
+    if len(list_connected) < 273:
         return False
 
     return True
 
+def is_inactive_full(list_inactive):
+    if len(list_inactive) < 500:
+        return False
+    return True 
+
 
 def is_idle_full(list_idle):
-    if len(list_idle) == 3000:
+    if len(list_idle) == 800:
         return True
 
     return False
@@ -103,38 +108,39 @@ def transition(UE, list_idle, list_connected, list_inactive, state):
         p1 = [0.1, 0.9]
         p2 = [0.3, 0.7]
         p3 = [0.4, 0.6]
-        if state == 0:
-            next = np.random.choice([0, 1], p=p1)
-            if next == 1 and is_full(list_inactive, list_connected) is False:
+        if state == 0:  # UE em idle
+            time.sleep(0.0001)
+            next = np.random.choice([0, 1], p=p1)  # Escolhe aleatoriamente se ficará em idle ou irá para connected, com base na probabilidade p1
+            if next == 1 and is_full(list_connected) is False:
                 idle_to_connected(UE, list_connected)
             elif next == 0 and is_idle_full(list_idle) is False:
                 list_idle.append(UE)
-        elif state == 1:
-            #sleep(0.1)
-            next = np.random.choice([0, 1], p=p2)
-            if next == 0 and is_idle_full(list_idle) is False:
+        elif state == 1:  # UE em connected
+            time.sleep(0.001)
+            next = np.random.choice([0, 1], p=p2)  # Escolhe aleatoriamente se retorna para idle, ou vai para inactive, com base na probabilidade p2
+            if next == 0 and is_idle_full(list_idle) is False:  
                 connected_to_idle(UE, list_idle)
             elif next == 0 and is_idle_full(list_idle) is True:
-                if is_full(list_inactive, list_connected) is False:
+                if is_inactive_full(list_inactive) is False:
                     connected_to_inactive(UE, list_inactive)
-            elif next == 1 and is_full(list_inactive, list_connected) is False:
+            elif next == 1 and is_inactive_full(list_inactive) is False:
                 connected_to_inactive(UE, list_inactive)
-            elif next == 1 and is_full(list_inactive, list_connected) is True:
+            elif next == 1 and is_inactive_full(list_inactive) is True:
                 if is_idle_full(list_idle) is False:
                     connected_to_idle(UE, list_idle)
-        elif state == 2:
-            #sleep(0.8)
-            next = np.random.choice([0, 1], p=p3)
-            if next == 1 and is_full(list_inactive, list_connected) is False:
+        elif state == 2:  # UE em inactive
+            time.sleep(0.008)
+            next = np.random.choice([0, 1], p=p3)  # Escolhe alçeatoriamente se retorna para idle, ou para connected, com base na probabilidade p3
+            if next == 1 and is_full(list_connected) is False:
                 inactive_to_connected(UE, list_connected)
-            elif next == 1 and is_full(list_inactive, list_connected) is True:
+            elif next == 1 and is_full(list_connected) is True:
                 if is_idle_full(list_idle) is False:
                     inactive_to_idle(UE, list_idle)
             elif next == 0 and is_idle_full(list_idle) is False:
                 inactive_to_idle(UE, list_idle)
             elif next == 0 and is_idle_full(list_idle) is True:
-                if is_full(list_inactive, list_connected) is False:
-                    inactive_to_connected(UE, list_connected)
+                if is_inactive_full(list_inactive) is False:
+                    list_inactive.append(UE)
     else:
         '''
         p = [idle-> idle, idle-> connected], [connected->idle, connected-> inactive], [inactive-> idle, inactive-> connected]
@@ -142,26 +148,39 @@ def transition(UE, list_idle, list_connected, list_inactive, state):
         p1= [0.01, 0.99]
         p2 = [0.1, 0.9]
         p3 = [0.2, 0.8]
-        if state == 0:
-            next = np.random.choice([0, 1], p=p1)
-            if next == 1 and is_full(list_inactive, list_connected) is False:
+        if state == 0:  # UE em idle
+            time.sleep(0.0001)
+            next = np.random.choice([0, 1], p=p1)  # Escolhe aleatoriamente se ficará em idle ou irá para connected, com base na probabilidade p1
+            if next == 1 and is_full(list_connected) is False:
                 idle_to_connected(UE, list_connected)
             elif next == 0 and is_idle_full(list_idle) is False:
                 list_idle.append(UE)
-        elif state == 1:
-            #sleep(0.8)
-            next = np.random.choice([0, 1], p=p2)
-            if next == 0 and is_idle_full(list_idle) is False:
+        elif state == 1:  # UE em connected
+            time.sleep(0.008)
+            next = np.random.choice([0, 1], p=p2)  # Escolhe aleatoriamente se retorna para idle, ou vai para inactive, com base na probabilidade p2
+            if next == 0 and is_idle_full(list_idle) is False:  
                 connected_to_idle(UE, list_idle)
-            elif next == 1 and is_full(list_inactive, list_connected) is False:
+            elif next == 0 and is_idle_full(list_idle) is True:
+                if is_inactive_full(list_inactive) is False:
+                    connected_to_inactive(UE, list_inactive)
+            elif next == 1 and is_inactive_full(list_inactive) is False:
                 connected_to_inactive(UE, list_inactive)
-        elif state == 2:
-            #sleep(0.01)
-            next = np.random.choice([0, 1], p=p3)
-            if next == 1 and is_full(list_inactive, list_connected) is False:
+            elif next == 1 and is_inactive_full(list_inactive) is True:
+                if is_idle_full(list_idle) is False:
+                    connected_to_idle(UE, list_idle)
+        elif state == 2:  # UE em inactive
+            time.sleep(0.001)
+            next = np.random.choice([0, 1], p=p3)  # Escolhe alçeatoriamente se retorna para idle, ou para connected, com base na probabilidade p3
+            if next == 1 and is_full(list_connected) is False:
                 inactive_to_connected(UE, list_connected)
-            elif next == 0 and is_idle_full(list_idle):
+            elif next == 1 and is_full(list_connected) is True:
+                if is_idle_full(list_idle) is False:
+                    inactive_to_idle(UE, list_idle)
+            elif next == 0 and is_idle_full(list_idle) is False:
                 inactive_to_idle(UE, list_idle)
+            elif next == 0 and is_idle_full(list_idle) is True:
+                if is_inactive_full(list_inactive) is False:
+                    list_inactive.append(UE)
 
 
 def start():
@@ -180,10 +199,11 @@ def start():
 
 
     while time.time() < time_end:
-        UEs_idle.append(rd.randint(0, 1))  # Entrada de usuários na rede, 0 -> baixo consumo, 1 -> alto consumo
-        if len(UEs_idle) > 10:
-            UE, state = sorteio_state(states)
-            transition(UE, UEs_idle, UEs_connected, UEs_inactive, state)
+        if is_idle_full(UEs_idle) is False:
+            UEs_idle.append(rd.randint(0, 1))  # Entrada de usuários na rede, 0 -> baixo consumo, 1 -> alto consumo
+        
+        UE, state = sorteio_state(states)
+        transition(UE, UEs_idle, UEs_connected, UEs_inactive, state)
         y.append(len(UEs_idle))
         z.append(len(UEs_connected))
         w.append((len(UEs_inactive)))
