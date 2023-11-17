@@ -195,12 +195,12 @@ def start():
     x = []
 
 
-    time_end = time.time() + 30
+    time_end = time.time() + 60
 
 
     while time.time() < time_end:
         
-        if is_idle_full(UEs_idle) is False:
+        if is_idle_full(UEs_idle) is False and time.time() < time_end - 30:
             UEs_idle.append(rd.randint(0, 1))  # Entrada de usuários na rede, 0 -> baixo consumo, 1 -> alto consumo
         
         UE, state = sorteio_state(states)
