@@ -199,6 +199,7 @@ def start():
 
 
     while time.time() < time_end:
+        
         if is_idle_full(UEs_idle) is False:
             UEs_idle.append(rd.randint(0, 1))  # Entrada de usuários na rede, 0 -> baixo consumo, 1 -> alto consumo
         
@@ -208,6 +209,7 @@ def start():
         z.append(len(UEs_connected))
         w.append((len(UEs_inactive)))
         x.append(datetime.datetime.now())
+        time.sleep(0.01)
 
     print(UEs_idle)
     print(f"Quantidade de UE idle: {len(UEs_idle)}", end='\n\n')
