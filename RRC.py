@@ -5,39 +5,8 @@ Markov Chains to model RRC states, which are, idle, connected and inactive state
 import random as rd
 import numpy as np
 import matplotlib.pyplot as plt
-import datetime
+from datetime import datetime
 from time import sleep
-
-
-"""
-def area(width):
-    points = []
-    for i in range(width + 1):
-        coluna = []
-        for j in range(width + 1):
-            coluna.append(j)
-        points.append(coluna)
-    return points
-
-
-def position(UE):
-    # Gera a posição x, y de um UE com base em uma distribuição gaussiana, com valor esperado 50 e variância 20
-
-    x = rd.gauss(50, 20)
-    y = rd.gauss(50, 20)
-    return x, y
-
-
-def core_registration(UE, coverage_area, position_UE):
-    # faz a checagem se o UE está na área de cobertuda do Core, e caso esteja, ele é registrado na rede
-
-    x, y = position_UE
-    area = coverage_area
-    if x in len(area) and y in area[x]:
-        return 1
-    else:
-        return -1
-"""
 
 
 def is_full(list_inactive, list_connected):
@@ -141,7 +110,7 @@ def transition(UE, list_idle, list_connected, list_inactive, state):
             elif next == 0 and is_idle_full(list_idle) is False:
                 list_idle.append(UE)
         elif state == 1:
-            sleep(0.1)
+            #sleep(0.1)
             next = np.random.choice([0, 1], p=p2)
             if next == 0 and is_idle_full(list_idle) is False:
                 connected_to_idle(UE, list_idle)
@@ -154,7 +123,7 @@ def transition(UE, list_idle, list_connected, list_inactive, state):
                 if is_idle_full(list_idle) is False:
                     connected_to_idle(UE, list_idle)
         elif state == 2:
-            sleep(0.8)
+            #sleep(0.8)
             next = np.random.choice([0, 1], p=p3)
             if next == 1 and is_full(list_inactive, list_connected) is False:
                 inactive_to_connected(UE, list_connected)
@@ -180,14 +149,14 @@ def transition(UE, list_idle, list_connected, list_inactive, state):
             elif next == 0 and is_idle_full(list_idle) is False:
                 list_idle.append(UE)
         elif state == 1:
-            sleep(0.8)
+            #sleep(0.8)
             next = np.random.choice([0, 1], p=p2)
             if next == 0 and is_idle_full(list_idle) is False:
                 connected_to_idle(UE, list_idle)
             elif next == 1 and is_full(list_inactive, list_connected) is False:
                 connected_to_inactive(UE, list_inactive)
         elif state == 2:
-            sleep(0.01)
+            #sleep(0.01)
             next = np.random.choice([0, 1], p=p3)
             if next == 1 and is_full(list_inactive, list_connected) is False:
                 inactive_to_connected(UE, list_connected)
@@ -213,7 +182,7 @@ while is_idle_full(UEs_idle) is False:
     y.append(len(UEs_idle))
     z.append(len(UEs_connected))
     w.append((len(UEs_inactive)))
-    x.append(datetime.datetime.now())
+    x.append(datetime.now())
 
 print(UEs_idle)
 print(f"Quantidade de UE idle: {len(UEs_idle)}", end='\n\n')
