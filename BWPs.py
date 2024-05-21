@@ -1,4 +1,4 @@
-class MainSlices:
+class BWP:
     bwpB = 10  #bandwith part for eMBB
     bwpT = bwpB - 5  #bandwith part for mMTC
     bwpU = bwpB - 3  #bandwith part for URLLC
